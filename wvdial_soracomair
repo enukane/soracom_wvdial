@@ -1,0 +1,85 @@
+#!/bin/bash
+
+dialup() {
+	cat > /etc/wvdial.conf << EOF
+[Dialer Defaults]
+Modem Type = Analog Modem
+Phone = *99***1#
+Carrier Check = no
+Auto Reconnect = yes
+Stupid Mode = yes
+
+ISDN = 0
+Init1 = ATZ
+Init2 = ATH
+Init3 = ATQ0 V1 E1 S0=0 &C1 &D2 +FCLASS=0
+Dial Command = ATD
+Modem = $1
+Baud = 460800
+
+Username = sora
+Password = sora
+EOF
+
+	echo waiting for modem device
+	logger waiting for modem device
+	for i in {1..30}
+	do
+		[ -e $1 ] && break
+		echo -n .
+		sleep 1
+	done
+	[ $i -eq 30 ] && (echo modem not found ; logger modem not found ; exit 1 )
+
+	/etc/init.d/ntp stop
+
+	while true
+	do
+		echo executing wvdial
+		logger executing wvdial
+
+		wvdial &
+		sleep 10
+
+		ip route del default
+		ip route add default dev ppp0
+
+		while true
+		do
+			ifconfig ppp0 > /dev/null 2>&1
+			if [ $? -ne 0 ]
+			then
+				echo ppp0 is down, reconnecting after 30 sec
+				logger ppp0 is down, reconnecting after 30 sec
+				killall wvdial
+				break
+			else
+				echo ppp0 is OK, check again after 60sec
+				logger ppp0 is OK, check again after 60sec
+			fi
+			ntpdate 133.243.238.243
+			sleep 60
+		done
+		sleep 30
+	done
+}
+
+disconnect() {
+	killall do_wvdial
+	killall wvdial
+}
+
+if [ $UID -ne 0 ]
+then
+	echo use root or sudo
+	exit 1;
+fi
+
+if (lsusb | grep 1004:618f > /dev/null)
+then
+	dialup /dev/ttyUSB2
+else
+	echo No supported modem found.
+	logger No supported modem found.
+	exit 1
+fi
