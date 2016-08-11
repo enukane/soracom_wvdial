@@ -65,7 +65,7 @@ EOF
 }
 
 disconnect() {
-	killall do_wvdial
+	killall wvdial_soracomair
 	killall wvdial
 }
 
