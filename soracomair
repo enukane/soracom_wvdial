@@ -16,14 +16,14 @@
 
 start(){
 	echo -n "connect air...\n"
-	do_wvdial &
+	wvdial_soracomair &
 	return 0
 }
 
 stop(){
 	echo -n "stopping connect air...\n"
 
-	pid=`ps ax | grep -v grep | grep do_wvdial | awk '{ print $1 }'`
+	pid=`ps ax | grep -v grep | grep wvdial_soracomair | awk '{ print $1 }'`
 	kill $pid
 	killall wvdial
 
