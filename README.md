@@ -11,6 +11,7 @@
 % sudo chmod +x /usr/sbin/wvdial_soracomair
 
 % sudo cp soracomair /etc/init.d/
+% sudo chmod +x /etc/init.d/soracomair
 % sudo update-rc.d soracomair defaults
 ```
 
