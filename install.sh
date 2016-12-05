@@ -8,7 +8,10 @@ if [ "root" != `whoami` ]; then
 	exit 1
 fi
 
-ln -s $BASEDIR/wvdial_soracomair /usr/sbin/wvdial_soracomair
-ln -s $BASEDIR/soracomair /etc/init.d/soracomair
+cp $BASEDIR/wvdial_soracomair /usr/sbin/wvdial_soracomair
+chmod +x /usr/sbin/wvdial_soracomair
+
+cp $BASEDIR/soracomair /etc/init.d/soracomair
+chmod +x /etc/init.d/soracomair
 
 update-rc.d soracomair defaults
