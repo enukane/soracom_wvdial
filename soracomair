@@ -1,11 +1,11 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          soracom_dial
+# Provides:          soracomair
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Example initscript
+# Short-Description: soracomair
 # Description:       This file should be used to construct scripts to be
 #                    placed in /etc/init.d.  This example start a
 #                    single forking daemon capable of writing a pid
@@ -14,28 +14,33 @@
 #                    override the defaults in /lib/init/init-d-script.
 ### END INIT INFO
 
-start(){
+do_start(){
 	echo -n "connect air...\n"
+	logger "starting soracomair"
 	wvdial_soracomair &
+	logger "started soracomair"
 	return 0
 }
 
-stop(){
-	echo -n "stopping connect air...\n"
+do_stop(){
+	echo -n "stopping soracomair...\n"
+	logger "stopping soracomair"
 
 	pid=`ps ax | grep -v grep | grep wvdial_soracomair | awk '{ print $1 }'`
 	kill $pid
 	killall wvdial
+
+	logger "stopped soracomair pid=$pid"
 
 	return 0
 }
 
 case $1 in
 	start)
-		start
+		do_start
 		;;
 	stop)
-		stop
+		do_stop
 		;;
 	*)
 		echo "Usage: $0 {start|stop}"
