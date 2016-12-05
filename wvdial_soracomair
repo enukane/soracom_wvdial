@@ -1,5 +1,10 @@
 #!/bin/bash
 
+print_log() {
+	echo "[wvdial_soracomair] $*"
+	echo "[wvdial_soracomair] $*"
+}
+
 dialup() {
 	cat > /etc/wvdial.conf << EOF
 [Dialer Defaults]
@@ -21,22 +26,20 @@ Username = sora
 Password = sora
 EOF
 
-	echo waiting for modem device
-	logger waiting for modem device
+	print_log "waiting for modem device"
 	for i in {1..30}
 	do
 		[ -e $1 ] && break
-		echo -n .
+		echo -n "."
 		sleep 1
 	done
-	[ $i -eq 30 ] && (echo modem not found ; logger modem not found ; exit 1 )
+	[ $i -eq 30 ] && (print_log "modem not found" ; exit 1 )
 
 	/etc/init.d/ntp stop
 
 	while true
 	do
-		echo executing wvdial
-		logger executing wvdial
+		print_log "executing wvdial"
 
 		wvdial &
 		sleep 10
@@ -49,13 +52,11 @@ EOF
 			ifconfig ppp0 > /dev/null 2>&1
 			if [ $? -ne 0 ]
 			then
-				echo ppp0 is down, reconnecting after 30 sec
-				logger ppp0 is down, reconnecting after 30 sec
+				print_log "ppp0 is down, reconnecting after 30sec"
 				killall wvdial
 				break
 			else
-				echo ppp0 is OK, check again after 60sec
-				logger ppp0 is OK, check again after 60sec
+				print_log "ppp0 is OK, check again after 60sec"
 			fi
 			ntpdate 133.243.238.243
 			sleep 60
@@ -71,15 +72,8 @@ disconnect() {
 
 if [ $UID -ne 0 ]
 then
-	echo use root or sudo
+	print_log "use root or sudo"
 	exit 1;
 fi
 
-if (lsusb | grep 1004:618f > /dev/null)
-then
-	dialup /dev/ttyUSB2
-else
-	echo No supported modem found.
-	logger No supported modem found.
-	exit 1
-fi
+dialup /dev/ttyUSB2
